@@ -45,7 +45,6 @@ function initHeader() {
     
   
     
-    // ===== SCROLL HIDE/SHOW (OPTIMIZED) =====
     window.addEventListener('scroll', function() {
         if (!ticking) {
             requestAnimationFrame(function() {
