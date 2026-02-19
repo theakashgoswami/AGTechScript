@@ -1,13 +1,12 @@
 /** ================================
- *   AG TECHSCRIPT • MAIN.JS
- *   Ultra-Optimized – No Reflow – 60fps
- * ================================= */
-document.addEventListener("DOMContentLoaded", () => {
+ *   AG TECHSCRIPT • MAIN.JS (FINAL)
+ *   Fully Optimized • Include Ready
+ * =================================
+*/
 
-    // Header will load via include → so wait for it
-    loadHeaderFooter().then(() => {
-        initHeader();
-    });
+// MAIN INIT ON DOM READY
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("✅ Main.js Loaded");
 
     initRevealAnimation();
     initAGTextAnimation();
@@ -15,213 +14,234 @@ document.addEventListener("DOMContentLoaded", () => {
     initFloatingElements();
 });
 
-
-/* ============================
-   HEADER + MOBILE TOGGLE
-============================ */
+/* ========================================
+   1️⃣ HEADER + MOBILE TOGGLE + SCROLL HIDE
+======================================== */
 function initHeader() {
-    const header = document.querySelector("header");
     const navToggle = document.getElementById("navToggle");
-    const navMenu = document.getElementById("mainNav");
+    const mainNav = document.getElementById("mainNav");
+    const customHeader = document.getElementById("header");
 
-    if (!header || !navToggle || !navMenu) {
-        console.warn("Header not loaded yet… retrying");
-        setTimeout(initHeader, 200);
+    if (!navToggle || !mainNav || !customHeader) {
+        console.warn("⏳ Header not found. Retrying...");
+        setTimeout(initHeader, 300);
         return;
     }
 
-    let lastScroll = window.scrollY;
-    let ticking = false;
+    console.log("✅ Header Ready");
 
-    // Toggle
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const swipeThreshold = 50;
+
+    // MOBILE TOGGLE
     navToggle.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        navMenu.classList.toggle("active");
+        mainNav.classList.toggle("active");
     });
 
-    // Hide/show on scroll
-    window.addEventListener("scroll", () => {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                const y = window.scrollY;
-                if (y > lastScroll && y > 100) {
-                    header.classList.add("header-hidden");
-                } else {
-                    header.classList.remove("header-hidden");
-                }
-                lastScroll = y;
-                ticking = false;
-            });
-            ticking = true;
+    // SCROLL HIDE/SHOW
+    function updateHeader() {
+        const sy = window.scrollY;
+
+        if (sy > lastScrollY && sy > 100) {
+            customHeader.style.transform = "translateY(-100%)";
+        } else {
+            customHeader.style.transform = "translateY(0)";
         }
+
+        lastScrollY = sy;
+        ticking = false;
+    }
+
+    window.addEventListener(
+        "scroll",
+        () => {
+            if (!ticking) {
+                requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
+        },
+        { passive: true }
+    );
+
+    // SWIPE GESTURE
+    document.addEventListener("touchstart", (e) => {
+        touchStartY = e.changedTouches[0].screenY;
     });
 
-    // Close on outside click
+    document.addEventListener("touchend", (e) => {
+        touchEndY = e.changedTouches[0].screenY;
+        const diff = touchEndY - touchStartY;
+
+        if (diff > swipeThreshold)
+            customHeader.style.transform = "translateY(0)";
+        if (diff < -swipeThreshold)
+            customHeader.style.transform = "translateY(-100%)";
+    });
+
+    // CLOSE ON OUTSIDE CLICK
     document.addEventListener("click", (e) => {
-        if (!e.target.closest(".header-wrapper") && navMenu.classList.contains("active")) {
-            navMenu.classList.remove("active");
+        if (!e.target.closest(".header-wrapper")) {
+            mainNav.classList.remove("active");
         }
     });
 
-    // Close on link click (mobile)
-    document.querySelectorAll(".nav-menu a").forEach(link => {
+    // CLOSE MENU ON NAV LINK CLICK (MOBILE)
+    document.querySelectorAll(".nav-menu a").forEach((link) => {
         link.addEventListener("click", () => {
-            if (window.innerWidth <= 768) navMenu.classList.remove("active");
+            if (window.innerWidth <= 768) {
+                mainNav.classList.remove("active");
+            }
         });
     });
 
-    // Close on resize
-    window.addEventListener("resize", () => {
-        if (window.innerWidth > 768) navMenu.classList.remove("active");
+    // SPACEBAR SHORTCUT
+    document.addEventListener("keydown", (e) => {
+        if (
+            e.code === "Space" &&
+            !e.target.matches("input, textarea, button, a")
+        ) {
+            e.preventDefault();
+            customHeader.style.transform =
+                customHeader.style.transform === "translateY(-100%)"
+                    ? "translateY(0)"
+                    : "translateY(-100%)";
+        }
     });
 }
 
-
-/* ==============================================
-   HEADER / FOOTER AUTO INCLUDE (GLOBAL)
-============================================== */
-function loadHeaderFooter() {
-    return new Promise((resolve) => {
-        // Header Load
-        fetch("/header.html")
-            .then(r => r.text())
-            .then(html => {
-                const div = document.getElementById("header-include");
-                if (div) div.innerHTML = html;
-            })
-            .then(() => {
-                // Footer Load
-                return fetch("/footer.html");
-            })
-            .then(r => r.text())
-            .then(html => {
-                const f = document.getElementById("footer-include");
-                if (f) f.innerHTML = html;
-                resolve();
-            });
-    });
-}
-
-
-/* =============================================
-   REVEAL ANIMATION (IntersectionObserver)
-============================================= */
+/* ========================================
+   2️⃣ REVEAL ANIMATION
+======================================== */
 function initRevealAnimation() {
-    const items = document.querySelectorAll(".reveal");
-    if (!items.length) return;
+    const reveals = document.querySelectorAll(".reveal");
+    if (!reveals.length) return;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) e.target.classList.add("active");
+    function reveal() {
+        const windowH = window.innerHeight;
+
+        reveals.forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            const offset = el.classList.contains("ag-footer") ? 50 : 150;
+
+            if (rect.top < windowH - offset && rect.bottom > offset) {
+                el.classList.add("active");
+            } else {
+                el.classList.remove("active");
+            }
         });
-    }, { threshold: 0.2 });
+    }
 
-    items.forEach(i => observer.observe(i));
+    window.addEventListener("scroll", reveal);
+    window.addEventListener("resize", reveal);
+    reveal();
 }
 
-
-/* =============================================
-    AG TEXT ANIMATION (MINIFY-PROOF)
-============================================= */
+/* ========================================
+   3️⃣ AG TEXT ANIMATION (BUGLESS)
+======================================== */
 function initAGTextAnimation() {
+    const Atext = document.getElementById("Atext");
+    const Gtext = document.getElementById("Gtext");
+
+    if (!Atext || !Gtext) return;
+
     const states = [
-        { A: "kash", G: "oswami" },
-        { A: "dvanced", G: "eneration" }
+        { A: "kash", G: "oswami" }, // Akash Goswami
+        { A: "dvanced", G: "eneration" }, // Advanced Generation
     ];
-
-    const A = document.getElementById("Atext");
-    const G = document.getElementById("Gtext");
-
-    if (!A || !G) return;
-
-    let widths = [];
-    const temp = document.createElement("span");
-    temp.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit";
-    document.body.appendChild(temp);
-
-    states.forEach(s => {
-        temp.textContent = s.A;
-        let wA = temp.offsetWidth;
-        temp.textContent = s.G;
-        let wG = temp.offsetWidth;
-        widths.push({ A: wA, G: wG });
-    });
-
-    document.body.removeChild(temp);
 
     let i = 0;
 
-    function expand(s, w) {
-        A.textContent = s.A;
-        G.textContent = s.G;
+    function expand(A, G) {
+        Atext.textContent = A;
+        Gtext.textContent = G;
 
-        A.style.setProperty("max-width", w.A + "px");
-        G.style.setProperty("max-width", w.G + "px");
-        A.style.opacity = "1";
-        G.style.opacity = "1";
+        Atext.style.maxWidth = A ? Atext.scrollWidth + "px" : "0px";
+        Gtext.style.maxWidth = G ? Gtext.scrollWidth + "px" : "0px";
+
+        Atext.style.opacity = A ? "1" : "0";
+        Gtext.style.opacity = G ? "1" : "0";
     }
 
     function collapse() {
-        A.style.setProperty("max-width", "0px");
-        G.style.setProperty("max-width", "0px");
-        A.style.opacity = "0";
-        G.style.opacity = "0";
+        Atext.style.maxWidth = Atext.scrollWidth + "px";
+        Gtext.style.maxWidth = Gtext.scrollWidth + "px";
+
+        Atext.getBoundingClientRect();
+        Gtext.getBoundingClientRect();
+
+        Atext.style.maxWidth = "0px";
+        Gtext.style.maxWidth = "0px";
+        Atext.style.opacity = "0";
+        Gtext.style.opacity = "0";
     }
 
-    function loop() {
-        expand(states[i], widths[i]);
+    function run() {
+        const s = states[i];
+
+        expand(s.A, s.G);
 
         setTimeout(() => {
             collapse();
             setTimeout(() => {
                 i = (i + 1) % states.length;
-                loop();
+                run();
             }, 1200);
         }, 2200);
     }
 
-    collapse();
-    setTimeout(loop, 1000);
+    expand("", "");
+    setTimeout(run, 1000);
 }
 
-
-/* =============================================
-    STORIES SLIDER
-============================================= */
+/* ========================================
+   4️⃣ STORIES SLIDER
+======================================== */
 function initStoriesSlider() {
-    const cards = document.querySelectorAll(".story-card");
-    if (!cards.length) return;
+    const stories = document.querySelectorAll(".story-card");
+    if (!stories.length) return;
 
-    let i = 0;
-    let last = 0;
-    const interval = 3200;
+    let index = 0;
 
-    function loop(time) {
-        if (!last) last = time;
-
-        if (time - last >= interval) {
-            let prev = i;
-            i = (i + 1) % cards.length;
-
-            cards.forEach((c, idx) => {
-                c.classList.remove("active", "prev");
-                if (idx === i) c.classList.add("active");
-                if (idx === prev) c.classList.add("prev");
-            });
-
-            last = time;
-        }
-        requestAnimationFrame(loop);
+    function show(i) {
+        stories.forEach((el, idx) => {
+            el.classList.remove("active", "prev");
+            if (idx === i) el.classList.add("active");
+            else if (idx === i - 1 || (i === 0 && idx === stories.length - 1))
+                el.classList.add("prev");
+        });
     }
 
-    requestAnimationFrame(loop);
+    show(index);
+
+    setInterval(() => {
+        index = (index + 1) % stories.length;
+        show(index);
+    }, 3200);
 }
 
-
-/* =============================================
-    FLOATING ELEMENTS
-============================================= */
+/* ========================================
+   5️⃣ FLOATING ELEMENTS (CSS-Controlled)
+======================================== */
 function initFloatingElements() {
-    console.log("Floating elements loaded");
+    console.log("Floating elements ready");
+}
+
+/* ========================================
+   6️⃣ ENCRYPTED GOOGLE SHEET URL (Optional)
+======================================== */
+function getEncryptedSheetURL() {
+    const encrypted = "12LdHpXyaV32tc4gZaDz8yawfsvSv_sA1-tlx0tzmHvc";
+    let decrypted = "";
+
+    for (let i = 0; i < encrypted.length; i++) {
+        decrypted += String.fromCharCode(encrypted.charCodeAt(i) - 1);
+    }
+
+    return `https://docs.google.com/spreadsheets/d/${decrypted}/gviz/tq?tqx=out:json`;
 }
