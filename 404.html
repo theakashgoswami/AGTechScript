@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 - Lost in Space</title>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000014;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
+  }
+
+  /* FULLSCREEN IFRAME (real site inside) */
+  #siteFrame {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+    filter: blur(0px);
+    transition: 1.2s ease;
+  }
+
+  /* black hole */
+  .blackhole {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 200px; height: 200px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #2a1e3a, #000 80%);
+    box-shadow: 0 0 60px #663399, 0 0 120px #330066, inset 0 0 40px #aa88ff;
+    animation: pulse 3s infinite ease-in-out;
+    z-index: 9999;
+  }
+
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); }
+    100% { transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  /* final 404 text */
+  .msg {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    opacity: 0;
+    transition: 1s;
+    z-index: 10000;
+  }
+  .msg.show { opacity: 1; }
+
+  .msg h1 {
+    font-size: 120px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, #d4b0ff);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .msg p { font-size: 22px; margin-bottom: 20px; }
+  .msg a {
+    display: inline-block;
+    padding: 14px 40px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 40px;
+    color: white;
+    text-decoration: none;
+    border: 1px solid #ffffff55;
+    backdrop-filter: blur(15px);
+  }
+</style>
+</head>
+
+<body>
+
+<!-- 1. Your REAL website loads inside iframe -->
+<iframe id="siteFrame" src="/"></iframe>
+
+<!-- 2. Blackhole animation on top -->
+<div class="blackhole"></div>
+
+<!-- 3. Final text after suck -->
+<div class="msg" id="finalMsg">
+  <h1>404</h1>
+  <p>उफ्फ! रास्ता भटक गए?</p>
+  <a href="/">वापस घर चलें →</a>
+</div>
+
+<script>
+window.onload = () => {
+  const frame = document.getElementById("siteFrame");
+  const msg   = document.getElementById("finalMsg");
+
+  setTimeout(() => {
+    frame.style.filter = "blur(20px) brightness(0.2)";
+    frame.style.transform = "scale(0.8)";
+  }, 1000);
+
+  setTimeout(() => {
+    frame.style.opacity = "0";
+  }, 2000);
+
+  setTimeout(() => {
+    msg.classList.add("show");
+  }, 3000);
+};
+</script>
+
+</body>
+</html>
