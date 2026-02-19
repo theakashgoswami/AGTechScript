@@ -1,232 +1,227 @@
-/**
- * MAIN.JS - Core functionality for AG TechScript
- * Fully optimized - No forced reflows, perfect toggle, 60fps performance
- */
+/** ================================
+ *   AG TECHSCRIPT • MAIN.JS
+ *   Ultra-Optimized – No Reflow – 60fps
+ * ================================= */
+document.addEventListener("DOMContentLoaded", () => {
 
-// ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ Main.js loaded');
-    
-    // Initialize all features
-    initHeader();           // Header with toggle (priority)
-    initRevealAnimation();  // Scroll animations
-    initAGTextAnimation();  // AG text effect
-    initStoriesSlider();    // Stories carousel
-    initFloatingElements(); // Floating icons
+    // Header will load via include → so wait for it
+    loadHeaderFooter().then(() => {
+        initHeader();
+    });
+
+    initRevealAnimation();
+    initAGTextAnimation();
+    initStoriesSlider();
+    initFloatingElements();
 });
 
-// ===== HEADER WITH TOGGLE (PERFECT) =====
+
+/* ============================
+   HEADER + MOBILE TOGGLE
+============================ */
 function initHeader() {
-    const header = document.querySelector('header');
-    const toggleBtn = document.getElementById('navToggle');
-    const navMenu = document.getElementById('mainNav');
-    
-    // Agar elements na mile to retry
-    if (!header || !toggleBtn || !navMenu) {
-        console.log('⏳ Header elements not ready, retrying...');
-        setTimeout(initHeader, 300);
+    const header = document.querySelector("header");
+    const navToggle = document.getElementById("navToggle");
+    const navMenu = document.getElementById("mainNav");
+
+    if (!header || !navToggle || !navMenu) {
+        console.warn("Header not loaded yet… retrying");
+        setTimeout(initHeader, 200);
         return;
     }
-    
-    console.log('✅ Header initialized with toggle');
-    
-    let lastScrollY = window.scrollY;
+
+    let lastScroll = window.scrollY;
     let ticking = false;
-    let touchStartY = 0;
-    
-    // ===== SIMPLE TOGGLE (GUARANTEED WORKING) =====
-    toggleBtn.onclick = function(e) {
+
+    // Toggle
+    navToggle.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        navMenu.classList.toggle('active');
-        console.log('Toggle:', navMenu.classList.contains('active') ? 'open' : 'closed');
-        return false;
-    };
-    
-  
-    
-    window.addEventListener('scroll', function() {
+        navMenu.classList.toggle("active");
+    });
+
+    // Hide/show on scroll
+    window.addEventListener("scroll", () => {
         if (!ticking) {
-            requestAnimationFrame(function() {
-                const currentY = window.scrollY;
-                if (currentY > lastScrollY && currentY > 100) {
-                    header.style.transform = 'translateY(-100%)';
+            requestAnimationFrame(() => {
+                const y = window.scrollY;
+                if (y > lastScroll && y > 100) {
+                    header.classList.add("header-hidden");
                 } else {
-                    header.style.transform = 'translateY(0)';
+                    header.classList.remove("header-hidden");
                 }
-                lastScrollY = currentY;
+                lastScroll = y;
                 ticking = false;
             });
             ticking = true;
         }
-    }, { passive: true });
-    
-    // ===== CLOSE ON OUTSIDE CLICK =====
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.header-wrapper') && navMenu.classList.contains('active')) {
-            navMenu.classList.remove('active');
+    });
+
+    // Close on outside click
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".header-wrapper") && navMenu.classList.contains("active")) {
+            navMenu.classList.remove("active");
         }
     });
-    
-    // ===== CLOSE ON LINK CLICK =====
-    document.querySelectorAll('.nav-menu a').forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                navMenu.classList.remove('active');
-            }
+
+    // Close on link click (mobile)
+    document.querySelectorAll(".nav-menu a").forEach(link => {
+        link.addEventListener("click", () => {
+            if (window.innerWidth <= 768) navMenu.classList.remove("active");
         });
     });
-    
-    // ===== RESIZE HANDLER =====
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            if (window.innerWidth > 768) {
-                navMenu.classList.remove('active');
-            }
-        }, 150);
-    }, { passive: true });
+
+    // Close on resize
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) navMenu.classList.remove("active");
+    });
 }
 
-// ===== REVEAL ANIMATION (USING INTERSECTION OBSERVER) =====
-function initRevealAnimation() {
-    const reveals = document.querySelectorAll('.reveal');
-    if (!reveals.length) return;
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            requestAnimationFrame(() => {
-                if (entry.target.classList.contains('ag-footer')) {
-                    entry.target.classList.add('active');
-                } else {
-                    entry.target.classList.toggle('active', entry.isIntersecting);
-                }
+
+/* ==============================================
+   HEADER / FOOTER AUTO INCLUDE (GLOBAL)
+============================================== */
+function loadHeaderFooter() {
+    return new Promise((resolve) => {
+        // Header Load
+        fetch("/header.html")
+            .then(r => r.text())
+            .then(html => {
+                const div = document.getElementById("header-include");
+                if (div) div.innerHTML = html;
+            })
+            .then(() => {
+                // Footer Load
+                return fetch("/footer.html");
+            })
+            .then(r => r.text())
+            .then(html => {
+                const f = document.getElementById("footer-include");
+                if (f) f.innerHTML = html;
+                resolve();
             });
-        });
-    }, { threshold: 0.1, rootMargin: '50px' });
-    
-    reveals.forEach(el => observer.observe(el));
-    console.log('✅ Reveal observer ready');
+    });
 }
 
-// ===== AG TEXT ANIMATION (NO REFLOWS) =====
+
+/* =============================================
+   REVEAL ANIMATION (IntersectionObserver)
+============================================= */
+function initRevealAnimation() {
+    const items = document.querySelectorAll(".reveal");
+    if (!items.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) e.target.classList.add("active");
+        });
+    }, { threshold: 0.2 });
+
+    items.forEach(i => observer.observe(i));
+}
+
+
+/* =============================================
+    AG TEXT ANIMATION (MINIFY-PROOF)
+============================================= */
 function initAGTextAnimation() {
     const states = [
         { A: "kash", G: "oswami" },
         { A: "dvanced", G: "eneration" }
     ];
-    
-    const Atext = document.getElementById('Atext');
-    const Gtext = document.getElementById('Gtext');
-    
-    if (!Atext || !Gtext) return;
-    
-    // Pre-calculate widths
-    const widths = [];
-    const temp = document.createElement('span');
-    temp.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font:inherit';
+
+    const A = document.getElementById("Atext");
+    const G = document.getElementById("Gtext");
+
+    if (!A || !G) return;
+
+    let widths = [];
+    const temp = document.createElement("span");
+    temp.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font:inherit";
     document.body.appendChild(temp);
-    
-    states.forEach(state => {
-        temp.textContent = state.A;
-        const aWidth = state.A ? temp.offsetWidth : 0;
-        temp.textContent = state.G;
-        const gWidth = state.G ? temp.offsetWidth : 0;
-        widths.push({ A: aWidth, G: gWidth });
+
+    states.forEach(s => {
+        temp.textContent = s.A;
+        let wA = temp.offsetWidth;
+        temp.textContent = s.G;
+        let wG = temp.offsetWidth;
+        widths.push({ A: wA, G: wG });
     });
-    
+
     document.body.removeChild(temp);
-    
-    let index = 0;
-    
-    function expand(state, w) {
-        Atext.textContent = state.A;
-        Gtext.textContent = state.G;
-        Atext.style.maxWidth = state.A ? w.A + 'px' : '0px';
-        Gtext.style.maxWidth = state.G ? w.G + 'px' : '0px';
-        Atext.style.opacity = state.A ? '1' : '0';
-        Gtext.style.opacity = state.G ? '1' : '0';
+
+    let i = 0;
+
+    function expand(s, w) {
+        A.textContent = s.A;
+        G.textContent = s.G;
+
+        A.style.setProperty("max-width", w.A + "px");
+        G.style.setProperty("max-width", w.G + "px");
+        A.style.opacity = "1";
+        G.style.opacity = "1";
     }
-    
+
     function collapse() {
-        Atext.style.maxWidth = '0px';
-        Gtext.style.maxWidth = '0px';
-        Atext.style.opacity = '0';
-        Gtext.style.opacity = '0';
+        A.style.setProperty("max-width", "0px");
+        G.style.setProperty("max-width", "0px");
+        A.style.opacity = "0";
+        G.style.opacity = "0";
     }
-    
-    function run() {
-        expand(states[index], widths[index]);
+
+    function loop() {
+        expand(states[i], widths[i]);
+
         setTimeout(() => {
             collapse();
             setTimeout(() => {
-                index = (index + 1) % states.length;
-                run();
+                i = (i + 1) % states.length;
+                loop();
             }, 1200);
         }, 2200);
     }
-    
-    expand({ A: '', G: '' }, { A: 0, G: 0 });
-    setTimeout(run, 1000);
-    console.log('✅ AG text animation ready');
+
+    collapse();
+    setTimeout(loop, 1000);
 }
 
-// ===== STORIES SLIDER (RAF OPTIMIZED) =====
+
+/* =============================================
+    STORIES SLIDER
+============================================= */
 function initStoriesSlider() {
-    const stories = document.querySelectorAll('.story-card');
-    if (!stories.length) return;
-    
-    let current = 0;
-    let rafId = null;
-    let lastTime = 0;
+    const cards = document.querySelectorAll(".story-card");
+    if (!cards.length) return;
+
+    let i = 0;
+    let last = 0;
     const interval = 3200;
-    
-    // Initialize first
-    requestAnimationFrame(() => {
-        stories.forEach(c => c.classList.remove('active', 'prev'));
-        stories[0].classList.add('active');
-    });
-    
-    function slide(timestamp) {
-        if (!lastTime) lastTime = timestamp;
-        
-        if (timestamp - lastTime >= interval) {
-            current = (current + 1) % stories.length;
-            
-            requestAnimationFrame(() => {
-                stories.forEach((card, i) => {
-                    card.classList.remove('active', 'prev');
-                    if (i === current) {
-                        card.classList.add('active');
-                    } else if (i === current - 1 || (current === 0 && i === stories.length - 1)) {
-                        card.classList.add('prev');
-                    }
-                });
+
+    function loop(time) {
+        if (!last) last = time;
+
+        if (time - last >= interval) {
+            let prev = i;
+            i = (i + 1) % cards.length;
+
+            cards.forEach((c, idx) => {
+                c.classList.remove("active", "prev");
+                if (idx === i) c.classList.add("active");
+                if (idx === prev) c.classList.add("prev");
             });
-            
-            lastTime = timestamp;
+
+            last = time;
         }
-        
-        rafId = requestAnimationFrame(slide);
+        requestAnimationFrame(loop);
     }
-    
-    rafId = requestAnimationFrame(slide);
-    
-    // Cleanup on page hide
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden && rafId) {
-            cancelAnimationFrame(rafId);
-        } else if (!document.hidden) {
-            lastTime = 0;
-            rafId = requestAnimationFrame(slide);
-        }
-    });
-    
-    console.log('✅ Stories slider ready');
+
+    requestAnimationFrame(loop);
 }
 
-// ===== FLOATING ELEMENTS (CSS ONLY) =====
+
+/* =============================================
+    FLOATING ELEMENTS
+============================================= */
 function initFloatingElements() {
-    console.log('✅ Floating elements ready');
+    console.log("Floating elements loaded");
 }
