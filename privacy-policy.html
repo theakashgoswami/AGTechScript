@@ -302,14 +302,14 @@
       <h1>Privacy Policy</h1>
       <p style="color: #4a5a72; max-width: 600px; margin: 0.5rem auto;">Your privacy matters. We handle your data with care and transparency.</p>
       <div class="last-updated">
-        <span>📅 Last Updated: March 15, 2025</span>
+        <span>📅 Last Updated: Feb 20, 2026</span>
       </div>
     </div>
 
     <!-- main card -->
     <div class="policy-card">
       
-      <!-- table of contents (optional but professional) -->
+      <!-- table of contents  -->
       <div class="toc">
         <h3>📋 Quick navigation</h3>
         <div class="toc-grid">
@@ -525,7 +525,6 @@
       </div>      
     </div>
   </div>
-   <div class="contacts reveal" id="contact"></div>
    <div id="footer-container"></div>
     <!-- AI Assistant -->
     <div id="ai-assistant-container"></div>
@@ -549,13 +548,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // VERY IMPORTANT → main.js function
             initHeader();
-        });
-
-    // CONTACT
-    fetch("partials/contact.html")
-        .then(r => r.text())
-        .then(html => {
-            document.getElementById("contact").innerHTML = html;
         });
 
     // FOOTER

@@ -8,11 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
         initHeader();
     });
 
-    // CONTACT
-    fetch("/partials/contact.html")
-    .then(r => r.text())
-    .then(html => document.getElementById("contact").innerHTML = html);
-
     // FOOTER
     fetch("/partials/footer.html")
     .then(r => r.text())

@@ -203,8 +203,6 @@
             <div class="unit-thumbs" id="unitThumbs"></div>
         </section>
 
-        <!-- Contact Section -->
-        <div class="contacts reveal" id="contact"></div>
     </main>
 
    <div id="footer-container"></div>
@@ -232,13 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // VERY IMPORTANT → main.js function
             initHeader();
-        });
-
-    // CONTACT
-    fetch("partials/contact.html")
-        .then(r => r.text())
-        .then(html => {
-            document.getElementById("contact").innerHTML = html;
         });
 
     // FOOTER
