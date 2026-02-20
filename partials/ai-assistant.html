@@ -1,33 +1,25 @@
-<!-- AI Floating Button -->
 <div class="ai-floating-btn" id="aiFloatingBtn">
     <div class="ai-btn-icon">🤖</div>
     <span class="ai-btn-text">Ask AI</span>
 </div>
 
-<!-- AI Popup Window -->
 <div class="ai-popup-window" id="aiPopupWindow">
     <div class="ai-popup-header">
         <h4>🤖 Digital Assistant</h4>
-        <button class="ai-close-btn" id="aiCloseBtn">×</button>
+        <button id="aiCloseBtn" class="ai-close-btn">×</button>
     </div>
-    
+
     <div class="ai-popup-content">
-        <div class="ai-messages" id="aiMessages">
-            <div class="ai-message bot">
-                <p>Hello! Ask me anything! 😊</p>
-            </div>
+        <div class="ai-messages" id="aiMessages"></div>
+
+        <div class="ai-suggestions">
+            <div class="suggestion-title">💡 Quick Questions</div>
+            <div class="suggestion-chips" id="suggestionChips"></div>
         </div>
-        
-        <div class="ai-input-container">
-            <div class="ai-suggestions" id="aiSuggestions">
-                <div class="suggestion-title">💡 Quick Questions:</div>
-                <div class="suggestion-chips" id="suggestionChips"></div>
-            </div>
-            
-            <div class="ai-input">
-                <input type="text" id="aiInput" placeholder="Type your question...">
-                <button id="aiSend" type="button">Send</button>
-            </div>
+
+        <div class="ai-input">
+            <input id="aiInput" type="text" placeholder="Type your question..." />
+            <button id="aiSend">Send</button>
         </div>
     </div>
 </div>
