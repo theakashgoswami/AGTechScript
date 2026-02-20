@@ -1,89 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>404 - Lost in Space</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Gravity Fold</title>
 
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #000014;
-    overflow: hidden;
-    font-family: system-ui, sans-serif;
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:#020012;
+    overflow:hidden;
+    font-family:system-ui;
   }
 
-  /* FULLSCREEN IFRAME (real site inside) */
-  #siteFrame {
-    width: 100vw;
-    height: 100vh;
-    border: none;
-    filter: blur(0px);
-    transition: 1.2s ease;
+  /* REAL WEBSITE */
+  #frame{
+    width:100vw;
+    height:100vh;
+    border:none;
+    transform-origin:center;
+    transition:0.4s ease;
+    filter:brightness(1) blur(0px);
   }
 
-  /* black hole */
-  .blackhole {
-    position: fixed;
-    top: 50%; left: 50%;
-    width: 200px; height: 200px;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #2a1e3a, #000 80%);
-    box-shadow: 0 0 60px #663399, 0 0 120px #330066, inset 0 0 40px #aa88ff;
-    animation: pulse 3s infinite ease-in-out;
-    z-index: 9999;
+  /* BLACK HOLE */
+  .hole{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle at 30% 30%, #3a2a5a, #000 70%);
+    box-shadow:0 0 90px #5511bb, 0 0 160px #330066 inset;
+    animation:pulse 3s infinite ease-in-out;
+    z-index:10;
   }
 
-  @keyframes pulse {
-    0% { transform: translate(-50%, -50%) scale(0.8); }
-    100% { transform: translate(-50%, -50%) scale(1.15); }
+  @keyframes pulse{
+    0%{transform:translate(-50%,-50%) scale(0.8);}
+    100%{transform:translate(-50%,-50%) scale(1.15);}
   }
 
-  /* final 404 text */
-  .msg {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-    opacity: 0;
-    transition: 1s;
-    z-index: 10000;
+  /* SUCTION WRAP EFFECT */
+  .collapse{
+    animation:collapseAnim 1.2s forwards ease-in-out;
   }
-  .msg.show { opacity: 1; }
+  @keyframes collapseAnim{
+    0%{transform:scale(1);}
+    30%{transform:scale(0.85) rotateX(25deg) rotateY(8deg);}
+    60%{transform:scale(0.55) rotateX(55deg) rotateY(25deg);}
+    100%{transform:scale(0.18) rotateX(70deg) rotateY(40deg); filter:blur(8px) brightness(0.2);}
+  }
 
-  .msg h1 {
-    font-size: 120px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #fff, #d4b0ff);
-    background-clip: text;
-    color: transparent;
+  /* suction */
+  .suck{
+    animation:suckAnim 0.9s forwards ease-in;
   }
-  .msg p { font-size: 22px; margin-bottom: 20px; }
-  .msg a {
-    display: inline-block;
-    padding: 14px 40px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 40px;
-    color: white;
-    text-decoration: none;
-    border: 1px solid #ffffff55;
-    backdrop-filter: blur(15px);
+  @keyframes suckAnim{
+    0%{transform:translate(0,0);}
+    100%{transform:translate(calc(50vw - 50%), calc(50vh - 50%)) scale(0); opacity:0;}
+  }
+
+  /* FINAL NEON TEXT */
+  .msg{
+    position:fixed;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    color:white;
+    opacity:0;
+    transition:1.2s ease;
+    z-index:20;
+  }
+  .msg.show{opacity:1;}
+
+  h1{
+    font-size:120px;
+    font-weight:900;
+    background:linear-gradient(135deg,#fff,#dcb3ff);
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 0 50px #a56cff;
+  }
+
+  a{
+    font-size:20px;
+    padding:14px 40px;
+    border-radius:40px;
+    text-decoration:none;
+    display:inline-block;
+    margin-top:10px;
+    background:rgba(255,255,255,0.15);
+    border:1px solid #ffffff44;
+    backdrop-filter:blur(10px);
+    color:white;
   }
 </style>
 </head>
 
 <body>
 
-<!-- 1. Your REAL website loads inside iframe -->
-<iframe id="siteFrame" src="/"></iframe>
+<iframe id="frame" src="/"></iframe>
+<div class="hole"></div>
 
-<!-- 2. Blackhole animation on top -->
-<div class="blackhole"></div>
-
-<!-- 3. Final text after suck -->
-<div class="msg" id="finalMsg">
+<div class="msg" id="msg">
   <h1>404</h1>
   <p>उफ्फ! रास्ता भटक गए?</p>
   <a href="/">वापस घर चलें →</a>
@@ -91,21 +113,14 @@
 
 <script>
 window.onload = () => {
-  const frame = document.getElementById("siteFrame");
-  const msg   = document.getElementById("finalMsg");
+  const f = document.getElementById("frame");
+  const msg = document.getElementById("msg");
 
-  setTimeout(() => {
-    frame.style.filter = "blur(20px) brightness(0.2)";
-    frame.style.transform = "scale(0.8)";
-  }, 1000);
+  setTimeout(()=> f.classList.add("collapse"), 600);
 
-  setTimeout(() => {
-    frame.style.opacity = "0";
-  }, 2000);
+  setTimeout(()=> f.classList.add("suck"), 1800);
 
-  setTimeout(() => {
-    msg.classList.add("show");
-  }, 3000);
+  setTimeout(()=> msg.classList.add("show"), 2600);
 };
 </script>
 
